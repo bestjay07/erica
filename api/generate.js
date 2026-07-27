@@ -18,51 +18,34 @@ export default async function handler(req, res) {
   try {
     const ai = new GoogleGenAI({ apiKey });
 
-    // 유사/연관 인강까지 폭넓게 찾도록 프롬프트 유연화
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `사용자가 입력한 검색어/키워드: "${lectureName}"
+      contents: `사용자가 수강하려는 인강명 또는 키워드: "${lectureName}"
 
-1. Google 검색을 활용하여 위 검색어와 일치하거나, 가장 유사/연관된 국내 인강(EBSi, 메가스터디, 대성마이맥, 이투스 등) 5개를 탐색하세요.
-2. 완전히 동일한 강의명이 없더라도 사용자의 의도(과목, 난이도, 강사, 주제 등)와 유사한 대표 인강들을 폭넓게 추천하세요.
-3. 데이터가 정확하지 않거나 검색 결과가 일부 부족하더라도 일반적인 인강의 구성(예: 보통 15~30강, 1강당 40~50분)을 참고하여 가장 합리적인 수치로 완성하세요.
+이 인강(또는 해당 과목/선생님 대표 강의)의 정보를 바탕으로 다음 정보를 추론하여 JSON 형식으로 출력하세요:
+- lectureTitle: 정확한 또는 가장 대표적인 강의명
+- teacherName: 강사 이름
+- totalEpisodes: 총 강수 (숫자만, 기본값 약 20~30강)
+- avgDurationMinutes: 1강당 평균 수강시간 (분 단위 숫자만, 예: 45)
 
-반드시 다음 JSON 형식에 맞춰 출력하세요:
+JSON 형식:
 {
-  "candidates": [
-    {
-      "id": 1,
-      "lectureTitle": "강의명",
-      "teacherName": "강사 이름",
-      "platform": "사이트명(예: EBSi, 메가스터디, 대성마이맥 등)",
-      "totalEpisodes": 총강수(숫자만),
-      "avgDurationMinutes": 1강당 평균 수강시간(분 단위 숫자만)
-    }
-  ]
+  "lectureTitle": "강의명",
+  "teacherName": "강사명",
+  "totalEpisodes": 30,
+  "avgDurationMinutes": 45
 }`,
       config: {
-        tools: [{ googleSearch: {} }],
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            candidates: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  id: { type: Type.INTEGER },
-                  lectureTitle: { type: Type.STRING },
-                  teacherName: { type: Type.STRING },
-                  platform: { type: Type.STRING },
-                  totalEpisodes: { type: Type.INTEGER },
-                  avgDurationMinutes: { type: Type.INTEGER }
-                },
-                required: ['id', 'lectureTitle', 'teacherName', 'platform', 'totalEpisodes', 'avgDurationMinutes']
-              }
-            }
+            lectureTitle: { type: Type.STRING },
+            teacherName: { type: Type.STRING },
+            totalEpisodes: { type: Type.INTEGER },
+            avgDurationMinutes: { type: Type.INTEGER }
           },
-          required: ['candidates']
+          required: ['lectureTitle', 'teacherName', 'totalEpisodes', 'avgDurationMinutes']
         }
       }
     });
@@ -72,6 +55,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('API Error:', error);
-    return res.status(500).json({ error: '유사 인강을 검색하는 중 오류가 발생했습니다. 다시 시도해주세요.' });
+    return res.status(500).json({ error: '인강 정보 생성 중 오류가 발생했습니다.' });
   }
 }
