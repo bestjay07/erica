@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     const ai = new GoogleGenAI({ apiKey });
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       contents: `사용자가 입력한 인강 검색어: "${lectureName}"
 이 검색어와 가장 관련 깊거나 유사한 대표 인강 5개를 찾아서 리스트로 제공해주세요. EBS, 메가스터디, 대성마이맥, 이투스, 커넥츠 등의 실제/유사 강의 정보를 바탕으로 각 강의의 총 강수와 1강당 평균 수강 시간(분)을 추정해서 제공하세요.`,
       config: {
