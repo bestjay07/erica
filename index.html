@@ -41,7 +41,7 @@
       gap: 1.5rem;
     }
 
-    /* 상단 입력 카드 */
+    /* 상단 카드 */
     .card {
       background: var(--card-bg);
       padding: 1.75rem;
@@ -107,6 +107,7 @@
       cursor: pointer;
       transition: all 0.2s ease;
       box-shadow: 0 4px 12px rgba(255, 126, 54, 0.25);
+      margin-top: 0.5rem;
     }
 
     .btn-primary:hover {
@@ -121,59 +122,119 @@
       transform: none;
     }
 
-    /* AI 확인 및 수강 영역 */
-    .main-card {
+    /* 5개 후보 선택 카드 */
+    .candidates-card {
       display: none;
     }
 
-    .verify-box {
-      background-color: var(--primary-light);
-      padding: 1.25rem;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 126, 54, 0.2);
+    .section-subtitle {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+    }
+
+    .candidate-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
       margin-bottom: 1.25rem;
     }
 
-    .verify-box .info-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--primary-dark);
-      margin-bottom: 0.3rem;
-    }
-
-    .verify-box .info-detail {
-      font-size: 0.9rem;
-      color: #666;
-      margin-bottom: 0.8rem;
-    }
-
-    .checkbox-label {
+    .candidate-item {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.8rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 14px;
+      border: 1.5px solid var(--border-color);
+      background: #FAFAFA;
       cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-main);
+      transition: all 0.2s ease;
     }
 
-    .checkbox-label input[type="checkbox"] {
+    .candidate-item:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .candidate-item.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: 0 2px 8px rgba(255, 126, 54, 0.15);
+    }
+
+    .candidate-item input[type="radio"] {
       width: 18px;
       height: 18px;
       accent-color: var(--primary);
     }
 
-    /* 오늘 요약 */
+    .candidate-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .candidate-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .candidate-detail {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .badge-platform {
+      background: #EFEFEF;
+      color: #555;
+      font-size: 0.72rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-right: 4px;
+      font-weight: 600;
+    }
+
+    /* 수강 플랜 카드 */
+    .main-card {
+      display: none;
+    }
+
+    .selected-banner {
+      background-color: var(--primary-light);
+      padding: 1rem 1.25rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 126, 54, 0.2);
+      margin-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .selected-banner .title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .selected-banner .sub {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 2px;
+    }
+
     .today-summary {
       text-align: center;
-      padding: 1.5rem 0;
+      padding: 1.25rem 0;
       border-bottom: 1px dashed var(--border-color);
     }
 
     .today-summary h2 {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.3rem;
       font-weight: 500;
     }
 
@@ -185,9 +246,8 @@
     }
 
     .today-time {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
-      font-weight: 500;
     }
 
     .attendance-check {
@@ -221,7 +281,6 @@
       color: var(--primary-dark);
     }
 
-    /* 스케줄 목록 */
     .schedule-header {
       margin-top: 1.5rem;
       margin-bottom: 0.75rem;
@@ -248,7 +307,6 @@
       background-color: #F8F9FA;
       border: 1px solid var(--border-color);
       font-size: 0.92rem;
-      transition: all 0.2s ease;
     }
 
     .schedule-item.today {
@@ -285,7 +343,7 @@
 <body>
 
   <div class="container">
-    <!-- 상단: 인강 이름 및 기간 입력창 -->
+    <!-- 상단: 입력 영역 -->
     <div class="card">
       <div class="header-title">
         <span>🍊</span>
@@ -293,8 +351,8 @@
       </div>
       <div class="input-group">
         <div>
-          <div class="input-label">인강 이름</div>
-          <input type="text" id="lectureName" placeholder="예: EBS 수능특강 수학I, 윤혜정의 개념의 나비효과" />
+          <div class="input-label">인강 이름 (키워드/강사명 가능)</div>
+          <input type="text" id="lectureName" placeholder="예: 개념의 나비효과, 정승제 수능유형" />
         </div>
         <div class="input-row">
           <div>
@@ -306,40 +364,43 @@
             <input type="date" id="endDate" />
           </div>
         </div>
-        <button class="btn-primary" id="searchBtn" onclick="searchLecture()">인강 정보 찾기 & 분배하기</button>
+        <button class="btn-primary" id="searchBtn" onclick="searchLectures()">유사 인강 5개 찾아보기</button>
       </div>
-      <div id="loading" class="loading">AI가 인강 정보(강의수, 평균 시간)를 탐색 중입니다...</div>
+      <div id="loading" class="loading">AI가 유사한 인강 5개를 검색 중입니다...</div>
     </div>
 
-    <!-- 중앙: 검증 및 수강 현황 -->
+    <!-- 후보 선택 카드 -->
+    <div class="card candidates-card" id="candidatesCard">
+      <div class="section-subtitle">🔍 연관성이 가장 높은 인강 5개 중 하나를 선택해주세요:</div>
+      <div class="candidate-list" id="candidateList">
+        <!-- AI가 찾은 5개 후보 출력 -->
+      </div>
+      <button class="btn-primary" id="confirmCandidateBtn" onclick="confirmSelection()" disabled>이 인강으로 일정 만들기</button>
+    </div>
+
+    <!-- 최종 스케줄 및 체크 카드 -->
     <div class="card main-card" id="mainCard">
-      <!-- AI 검색 정보 확인 단계 -->
-      <div class="verify-box" id="verifyBox">
-        <div class="info-title" id="aiLectureInfo">강의명: - | 선생님: -</div>
-        <div class="info-detail" id="aiDetailInfo">총 강수: -강 | 1강당 평균 시간: -분</div>
-        <label class="checkbox-label">
-          <input type="checkbox" id="verifyCheck" onchange="toggleConfirm(this)" />
-          찾은 인강 정보가 맞습니다. (일정 계산 시작)
-        </label>
+      <div class="selected-banner">
+        <div>
+          <div class="title" id="displayTitle">인강 제목</div>
+          <div class="sub" id="displayDetail">강사명 · 총 0강</div>
+        </div>
       </div>
 
-      <!-- 플랜 내용 (인강 확인 후 활성화) -->
-      <div id="planSection" style="display: none;">
-        <div class="today-summary">
-          <h2>오늘 학습 목표</h2>
-          <div class="today-stats" id="todayEpisodes">0강</div>
-          <div class="today-time" id="todayTime">총 예상 시간: 0분</div>
-        </div>
+      <div class="today-summary">
+        <h2>오늘 권장 학습량</h2>
+        <div class="today-stats" id="todayEpisodes">0강</div>
+        <div class="today-time" id="todayTime">총 예상 시간:약 0분 (0시간)</div>
+      </div>
 
-        <label class="attendance-check">
-          <input type="checkbox" id="todayCheck" onchange="toggleTodayDone(this.checked)" />
-          <span>오늘 인강 수강 완료!</span>
-        </label>
+      <label class="attendance-check">
+        <input type="checkbox" id="todayCheck" onchange="toggleTodayDone(this.checked)" />
+        <span>오늘 목표 인강 수강 완료!</span>
+      </label>
 
-        <div class="schedule-header">전체 기간 수강 일정표</div>
-        <div class="schedule-list" id="scheduleList">
-          <!-- 일자별 세부 일정 출력 -->
-        </div>
+      <div class="schedule-header">📅 전체 수강 일정표</div>
+      <div class="schedule-list" id="scheduleList">
+        <!-- 날짜별 수강 분배 목록 -->
       </div>
     </div>
   </div>
@@ -348,10 +409,12 @@
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById('startDate').value = todayStr;
 
-    let currentLectureData = null;
+    let candidateData = [];
+    let selectedCandidate = null;
     let schedulePlan = [];
+    let searchPeriod = { start: '', end: '' };
 
-    async function searchLecture() {
+    async function searchLectures() {
       const name = document.getElementById('lectureName').value.trim();
       const startDate = document.getElementById('startDate').value;
       const endDate = document.getElementById('endDate').value;
@@ -366,10 +429,16 @@
         return;
       }
 
+      searchPeriod = { start: startDate, end: endDate };
+
       const searchBtn = document.getElementById('searchBtn');
       const loading = document.getElementById('loading');
       searchBtn.disabled = true;
       loading.style.display = 'block';
+
+      // 하단 카드들 닫기
+      document.getElementById('candidatesCard').style.display = 'none';
+      document.getElementById('mainCard').style.display = 'none';
 
       try {
         const response = await fetch('/api/generate', {
@@ -380,23 +449,14 @@
 
         const data = await response.json();
 
-        if (!response.ok || !data.found) {
-          alert('인강 정보를 찾을 수 없거나 오류가 발생했습니다. 정확한 강의명을 입력해주세요.');
+        if (!response.ok || !data.candidates || data.candidates.length === 0) {
+          alert('유사한 인강을 찾지 못했습니다. 키워드를 변경해서 다시 시도해보세요.');
           return;
         }
 
-        currentLectureData = {
-          ...data,
-          startDate,
-          endDate
-        };
-
-        document.getElementById('aiLectureInfo').innerText = `${data.lectureTitle} (${data.teacherName} 선생님)`;
-        document.getElementById('aiDetailInfo').innerText = `총 ${data.totalEpisodes}강 · 1강당 약 ${data.avgDurationMinutes}분`;
-        
-        document.getElementById('verifyCheck').checked = false;
-        document.getElementById('planSection').style.display = 'none';
-        document.getElementById('mainCard').style.display = 'block';
+        candidateData = data.candidates;
+        renderCandidates();
+        document.getElementById('candidatesCard').style.display = 'block';
 
       } catch (err) {
         alert('서버 통신 중 오류가 발생했습니다.');
@@ -406,20 +466,58 @@
       }
     }
 
-    function toggleConfirm(checkbox) {
-      if (checkbox.checked) {
-        calculateSchedule();
-        document.getElementById('planSection').style.display = 'block';
-      } else {
-        document.getElementById('planSection').style.display = 'none';
-      }
+    function renderCandidates() {
+      const listEl = document.getElementById('candidateList');
+      listEl.innerHTML = '';
+      selectedCandidate = null;
+      document.getElementById('confirmCandidateBtn').disabled = true;
+
+      candidateData.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'candidate-item';
+        div.onclick = () => selectCandidate(item, div);
+
+        div.innerHTML = `
+          <input type="radio" name="candidateRadio" id="cand_${item.id}" />
+          <div class="candidate-info">
+            <div class="candidate-title">
+              <span class="badge-platform">${item.platform || '인강'}</span>
+              ${item.lectureTitle} (${item.teacherName} 선생님)
+            </div>
+            <div class="candidate-detail">
+              총 <strong>${item.totalEpisodes}강</strong> · 1강당 평균 약 <strong>${item.avgDurationMinutes}분</strong>
+            </div>
+          </div>
+        `;
+        listEl.appendChild(div);
+      });
+    }
+
+    function selectCandidate(item, element) {
+      document.querySelectorAll('.candidate-item').forEach(el => el.classList.remove('selected'));
+      element.classList.add('selected');
+
+      const radio = element.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+
+      selectedCandidate = item;
+      document.getElementById('confirmCandidateBtn').disabled = false;
+    }
+
+    function confirmSelection() {
+      if (!selectedCandidate) return;
+
+      document.getElementById('displayTitle').innerText = selectedCandidate.lectureTitle;
+      document.getElementById('displayDetail').innerText = `${selectedCandidate.teacherName} 선생님 · 총 ${selectedCandidate.totalEpisodes}강 (강당 약 ${selectedCandidate.avgDurationMinutes}분)`;
+
+      schedulePlan = [];
+      calculateSchedule();
+      document.getElementById('mainCard').style.display = 'block';
     }
 
     function calculateSchedule() {
-      if (!currentLectureData) return;
-
-      const start = new Date(currentLectureData.startDate);
-      const end = new Date(currentLectureData.endDate);
+      const start = new Date(searchPeriod.start);
+      const end = new Date(searchPeriod.end);
       const dayDiff = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
       let dates = [];
@@ -436,9 +534,9 @@
         });
       }
 
-      const totalEp = currentLectureData.totalEpisodes;
+      const totalEp = selectedCandidate.totalEpisodes;
       const remainingDays = dates.filter(d => !d.done);
-      
+
       if (remainingDays.length > 0) {
         const baseEp = Math.floor(totalEp / remainingDays.length);
         let extraEp = totalEp % remainingDays.length;
@@ -462,7 +560,7 @@
     }
 
     function recalculateFromToday() {
-      const totalEp = currentLectureData.totalEpisodes;
+      const totalEp = selectedCandidate.totalEpisodes;
       
       const doneDays = schedulePlan.filter(p => p.done);
       const completedEpCount = doneDays.reduce((sum, p) => sum + p.episodes, 0);
@@ -489,7 +587,7 @@
       scheduleListEl.innerHTML = '';
 
       const todayPlan = schedulePlan.find(p => p.date === todayStr);
-      const avgMinutes = currentLectureData.avgDurationMinutes;
+      const avgMinutes = selectedCandidate.avgDurationMinutes;
 
       if (todayPlan) {
         document.getElementById('todayEpisodes').innerText = `${todayPlan.episodes}강`;
