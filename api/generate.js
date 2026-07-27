@@ -17,31 +17,36 @@ export default async function handler(req, res) {
 
   try {
     const ai = new GoogleGenAI({ apiKey });
-    
-    // Google Search Grounding을 통해 실제 인강 정보를 실시간 검색
+
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: `사용자가 입력한 검색어: "${lectureName}"
 
-구글 검색을 활용하여 위 검색어와 가장 관련 깊은 실제 한국 인터넷 강의(EBS, 메가스터디, 대성마이맥, 이투스, 공단기 등)를 **최대 5개** 찾으세요.
+구글 검색을 활용하여 위 검색어와 가장 관련 깊은 실제 한국 인터넷 강의(EBS, 메가스터디, 대성마이맥, 이투스, 공단기 등)를 최대 5개 찾으세요.
 
-반드시 마크다운 코드블록이나 추가 설명 없이 아래 형태의 JSON 배열만 순수하게 출력하세요:
+반드시 다른 텍스트나 설명 없이 오직 JSON 배열 형태([ ... ])로만 응답하세요:
 [
   {
     "lectureTitle": "정확한 전체 강의명 1",
     "teacherName": "강사 이름",
     "totalEpisodes": 실제총강수(숫자만),
     "avgDurationMinutes": 평균강의시간(분단위숫자)
-  },
-  ...
+  }
 ]`,
       config: {
-        tools: [{ googleSearch: {} }], // 실시간 구글 검색 활성화
+        tools: [{ googleSearch: {} }],
       }
     });
 
-    const text = response.text.trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
-    const candidates = JSON.parse(text);
+    const text = response.text;
+
+    // AI 응답 중 순수 JSON 배열부분만 정규식으로 안전하게 추출
+    const jsonMatch = text.match(/\[\s*\{[\s\S]*\}\s*\]/);
+    if (!jsonMatch) {
+      throw new Error('JSON 형식을 찾을 수 없습니다.');
+    }
+
+    const candidates = JSON.parse(jsonMatch[0]);
 
     return res.status(200).json({ candidates });
   } catch (error) {
