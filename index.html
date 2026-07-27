@@ -41,7 +41,6 @@
       gap: 1.5rem;
     }
 
-    /* 상단 카드 */
     .card {
       background: var(--card-bg);
       padding: 1.75rem;
@@ -79,7 +78,7 @@
       gap: 0.75rem;
     }
 
-    input[type="text"], input[type="date"] {
+    input[type="text"], input[type="number"], input[type="date"] {
       width: 100%;
       padding: 0.8rem 1rem;
       border: 1.5px solid var(--border-color);
@@ -122,7 +121,6 @@
       transform: none;
     }
 
-    /* 5개 후보 선택 카드 */
     .candidates-card {
       display: none;
     }
@@ -174,6 +172,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
+      width: 100%;
     }
 
     .candidate-title {
@@ -197,7 +196,13 @@
       font-weight: 600;
     }
 
-    /* 수강 플랜 카드 */
+    .edit-box {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border-color);
+      display: none;
+    }
+
     .main-card {
       display: none;
     }
@@ -208,9 +213,6 @@
       border-radius: 14px;
       border: 1px solid rgba(255, 126, 54, 0.2);
       margin-bottom: 1.25rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
     }
 
     .selected-banner .title {
@@ -351,8 +353,8 @@
       </div>
       <div class="input-group">
         <div>
-          <div class="input-label">인강 이름 (키워드/강사명 가능)</div>
-          <input type="text" id="lectureName" placeholder="예: 개념의 나비효과, 정승제 수능유형" />
+          <div class="input-label">인강 이름 또는 키워드</div>
+          <input type="text" id="lectureName" placeholder="예: 윤혜정의 개념의 나비효과, 정승제 개때잡" />
         </div>
         <div class="input-row">
           <div>
@@ -364,21 +366,37 @@
             <input type="date" id="endDate" />
           </div>
         </div>
-        <button class="btn-primary" id="searchBtn" onclick="searchLectures()">유사 인강 5개 찾아보기</button>
+        <button class="btn-primary" id="searchBtn" onclick="searchLectures()">Google 검색으로 실제 인강 찾기</button>
       </div>
-      <div id="loading" class="loading">AI가 유사한 인강 5개를 검색 중입니다...</div>
+      <div id="loading" class="loading">AI가 웹 검색을 통해 실제 인강 정보를 수집하는 중입니다...</div>
     </div>
 
     <!-- 후보 선택 카드 -->
     <div class="card candidates-card" id="candidatesCard">
-      <div class="section-subtitle">🔍 연관성이 가장 높은 인강 5개 중 하나를 선택해주세요:</div>
+      <div class="section-subtitle">🌐 검색된 실제 인강 목록입니다. 맞는 인강을 선택해주세요:</div>
       <div class="candidate-list" id="candidateList">
-        <!-- AI가 찾은 5개 후보 출력 -->
+        <!-- AI 검색 후보 출력 -->
       </div>
+
+      <!-- 정보 직접 수정 옵션 -->
+      <div class="edit-box" id="editBox">
+        <div class="section-subtitle" style="margin-bottom:0.5rem;">✏️ 총 강수 및 시간 수정 (필요 시)</div>
+        <div class="input-row">
+          <div>
+            <div class="input-label">총 강수(강)</div>
+            <input type="number" id="editTotalEpisodes" min="1" />
+          </div>
+          <div>
+            <div class="input-label">1강당 평균 시간(분)</div>
+            <input type="number" id="editAvgDuration" min="1" />
+          </div>
+        </div>
+      </div>
+
       <button class="btn-primary" id="confirmCandidateBtn" onclick="confirmSelection()" disabled>이 인강으로 일정 만들기</button>
     </div>
 
-    <!-- 최종 스케줄 및 체크 카드 -->
+    <!-- 최종 스케줄 카드 -->
     <div class="card main-card" id="mainCard">
       <div class="selected-banner">
         <div>
@@ -390,7 +408,7 @@
       <div class="today-summary">
         <h2>오늘 권장 학습량</h2>
         <div class="today-stats" id="todayEpisodes">0강</div>
-        <div class="today-time" id="todayTime">총 예상 시간:약 0분 (0시간)</div>
+        <div class="today-time" id="todayTime">총 예상 시간: 약 0분 (0시간)</div>
       </div>
 
       <label class="attendance-check">
@@ -436,7 +454,6 @@
       searchBtn.disabled = true;
       loading.style.display = 'block';
 
-      // 하단 카드들 닫기
       document.getElementById('candidatesCard').style.display = 'none';
       document.getElementById('mainCard').style.display = 'none';
 
@@ -450,7 +467,7 @@
         const data = await response.json();
 
         if (!response.ok || !data.candidates || data.candidates.length === 0) {
-          alert('유사한 인강을 찾지 못했습니다. 키워드를 변경해서 다시 시도해보세요.');
+          alert('실제 인강 검색에 실패했습니다. 더 정확한 단어나 강사명으로 시도해 보세요.');
           return;
         }
 
@@ -471,6 +488,7 @@
       listEl.innerHTML = '';
       selectedCandidate = null;
       document.getElementById('confirmCandidateBtn').disabled = true;
+      document.getElementById('editBox').style.display = 'none';
 
       candidateData.forEach(item => {
         const div = document.createElement('div');
@@ -500,15 +518,26 @@
       const radio = element.querySelector('input[type="radio"]');
       if (radio) radio.checked = true;
 
-      selectedCandidate = item;
+      selectedCandidate = { ...item };
+      
+      document.getElementById('editTotalEpisodes').value = item.totalEpisodes;
+      document.getElementById('editAvgDuration').value = item.avgDurationMinutes;
+      document.getElementById('editBox').style.display = 'block';
+
       document.getElementById('confirmCandidateBtn').disabled = false;
     }
 
     function confirmSelection() {
       if (!selectedCandidate) return;
 
+      const userEp = parseInt(document.getElementById('editTotalEpisodes').value);
+      const userDur = parseInt(document.getElementById('editAvgDuration').value);
+
+      if (userEp > 0) selectedCandidate.totalEpisodes = userEp;
+      if (userDur > 0) selectedCandidate.avgDurationMinutes = userDur;
+
       document.getElementById('displayTitle').innerText = selectedCandidate.lectureTitle;
-      document.getElementById('displayDetail').innerText = `${selectedCandidate.teacherName} 선생님 · 총 ${selectedCandidate.totalEpisodes}강 (강당 약 ${selectedCandidate.avgDurationMinutes}분)`;
+      document.getElementById('displayDetail').innerText = `${selectedCandidate.teacherName} 선생님 (${selectedCandidate.platform || '인강'}) · 총 ${selectedCandidate.totalEpisodes}강 (강당 약 ${selectedCandidate.avgDurationMinutes}분)`;
 
       schedulePlan = [];
       calculateSchedule();
