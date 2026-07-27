@@ -1,52 +1,69 @@
-// 인강 검색 버튼 클릭 함수
-async function searchLecture() {
-  const lectureName = document.getElementById('lectureInput').value;
-  
-  const response = await fetch('/api/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ lectureName })
-  });
-  
-  const data = await response.json();
-  
-  if (data.candidates && data.candidates.length > 0) {
-    // 5개 검색 결과를 화면에 선택지로 띄워주는 함수 호출
-    renderCandidateList(data.candidates);
-  } else {
-    alert('검색 결과가 없습니다.');
-  }
-}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>인강 플래너</title>
+</head>
+<body>
 
-// 사용자 선택 화면 표시 함수
-function renderCandidateList(candidates) {
-  const container = document.getElementById('resultContainer');
-  container.innerHTML = '<h3>원하시는 강의를 선택해주세요:</h3>';
-  
-  candidates.forEach(item => {
-    const btn = document.createElement('button');
-    btn.className = 'candidate-item';
-    btn.style.display = 'block';
-    btn.style.margin = '8px 0';
-    btn.style.padding = '10px';
-    btn.style.width = '100%';
-    btn.style.textAlign = 'left';
-    
-    btn.innerHTML = `
-      <strong>${item.lectureTitle}</strong> (${item.teacherName} 선생님)<br>
-      <small>총 ${item.totalEpisodes}강 / 강당 약 ${item.avgDurationMinutes}분</small>
-    `;
-    
-    // 사용자가 해당 인강 선택 시 최종 강의 생성
-    btn.onclick = () => {
-      selectLecture(item);
-    };
-    
-    container.appendChild(btn);
-  });
-}
+  <!-- 기존 입력 폼 및 결과 컨테이너 -->
+  <input type="text" id="lectureInput" placeholder="인강 이름을 입력하세요">
+  <button onclick="searchLecture()">검색</button>
 
-function selectLecture(selected) {
-  alert(`'${selected.lectureTitle}' 강의가 선택되었습니다! 일정표를 생성합니다.`);
-  // 여기서 selected.totalEpisodes, selected.avgDurationMinutes 바탕으로 일정표 생성 로직 실행
-}
+  <div id="resultContainer"></div>
+
+  <!-- ⚠️ 자바스크립트 코드는 반드시 아래처럼 <script> 태그 안에 넣어주셔야 합니다! -->
+  <script>
+    async function searchLecture() {
+      const lectureName = document.getElementById('lectureInput').value;
+      if (!lectureName) return alert('강의명을 입력해주세요.');
+      
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lectureName })
+      });
+      
+      const data = await response.json();
+      
+      if (data.candidates && data.candidates.length > 0) {
+        renderCandidateList(data.candidates);
+      } else {
+        alert('검색 결과가 없습니다.');
+      }
+    }
+
+    function renderCandidateList(candidates) {
+      const container = document.getElementById('resultContainer');
+      container.innerHTML = '<h3>원하시는 강의를 선택해주세요:</h3>';
+      
+      candidates.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'candidate-item';
+        btn.style.display = 'block';
+        btn.style.margin = '8px 0';
+        btn.style.padding = '10px';
+        btn.style.width = '100%';
+        btn.style.textAlign = 'left';
+        btn.style.cursor = 'pointer';
+        
+        btn.innerHTML = `
+          <strong>${item.lectureTitle}</strong> (${item.teacherName} 선생님)<br>
+          <small>총 ${item.totalEpisodes}강 / 강당 약 ${item.avgDurationMinutes}분</small>
+        `;
+        
+        btn.onclick = () => {
+          selectLecture(item);
+        };
+        
+        container.appendChild(btn);
+      });
+    }
+
+    function selectLecture(selected) {
+      alert(`'${selected.lectureTitle}' 강의가 선택되었습니다!`);
+      // 선택 후 추가 로직 처리
+    }
+  </script>
+</body>
+</html>
