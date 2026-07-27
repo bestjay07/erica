@@ -6,6 +6,9 @@ export default async function handler(req, res) {
   }
 
   const { lectureName } = req.body;
+  const ai = new GoogleGenerativeAI(apiKey);
+  const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  const response = await model.generateContent(...);
 
   if (!lectureName) {
     return res.status(400).json({ error: '인강 이름을 입력해주세요.' });
