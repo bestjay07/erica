@@ -18,11 +18,28 @@ export default async function handler(req, res) {
   try {
     const ai = new GoogleGenAI({ apiKey });
 
+    // 1단계: Google 검색을 활용하여 실제 존재하는 인강 정보 검색
     const response = await ai.models.generateContent({
-      model: 'gemini-3.1-flash-lite',
-      contents: `사용자가 입력한 인강 검색어: "${lectureName}"
-이 검색어와 가장 관련 깊거나 유사한 대표 인강 5개를 찾아서 리스트로 제공해주세요. EBS, 메가스터디, 대성마이맥, 이투스, 커넥츠 등의 실제/유사 강의 정보를 바탕으로 각 강의의 총 강수와 1강당 평균 수강 시간(분)을 추정해서 제공하세요.`,
+      model: 'gemini-2.5-flash',
+      contents: `사용자가 찾고자 하는 인강 검색어: "${lectureName}"
+
+Google 검색을 활용하여 실제 국내 인강 사이트(EBSi, 메가스터디, 대성마이맥, 이투스 등)에 존재하는 실제 강의 중 위 검색어와 가장 관련 높은 실제 인강 5개의 정보를 찾으세요.
+
+지어내지 말고 검색된 실제 정보만을 바탕으로 다음 JSON 형식으로 정확히 출력하세요:
+{
+  "candidates": [
+    {
+      "id": 1,
+      "lectureTitle": "실제 정확한 강의명",
+      "teacherName": "실제 강사 이름",
+      "platform": "사이트명(예: EBSi, 메가스터디 등)",
+      "totalEpisodes": 총강수(숫자만),
+      "avgDurationMinutes": 1강당 평균 수강시간(분 단위 숫자만)
+    }
+  ]
+}`,
       config: {
+        tools: [{ googleSearch: {} }], // 실제 웹 검색 기능 사용
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
@@ -53,6 +70,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('API Error:', error);
-    return res.status(500).json({ error: '인강 후보를 찾는 중 오류가 발생했습니다.' });
+    return res.status(500).json({ error: '인강 검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' });
   }
 }
