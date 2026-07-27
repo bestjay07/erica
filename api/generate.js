@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     const ai = new GoogleGenAI({ apiKey });
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       contents: `인강 이름: "${lectureName}"
 이 인터넷 강의의 정밀 정보를 찾아 다음 JSON 형태로만 응답하세요. 다른 설명이나 마크다운 코드블록은 제외하고 Pure JSON만 출력하세요:
 {
