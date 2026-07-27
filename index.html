@@ -2,67 +2,105 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>인강 플래너</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>스마트 인강 플래너</title>
+  <!-- Tailwind CSS CDN 추가 -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
 
-  <!-- 기존 입력 폼 및 결과 컨테이너 -->
-  <input type="text" id="lectureInput" placeholder="인강 이름을 입력하세요">
-  <button onclick="searchLecture()">검색</button>
+  <div class="max-w-md w-full bg-white rounded-xl shadow-md p-6 space-y-6">
+    <div class="text-center">
+      <h1 class="text-2xl font-bold text-gray-800">📚 스마트 인강 플래너</h1>
+      <p class="text-sm text-gray-500 mt-1">찾으시는 강의명을 입력해 주세요</p>
+    </div>
 
-  <div id="resultContainer"></div>
+    <!-- 검색 입력 폼 -->
+    <div class="flex gap-2">
+      <input 
+        type="text" 
+        id="lectureInput" 
+        placeholder="예: 윤혜정의 나비효과" 
+        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        onkeyup="if(window.event.keyCode==13){searchLecture()}"
+      >
+      <button 
+        onclick="searchLecture()" 
+        class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200"
+      >
+        검색
+      </button>
+    </div>
 
-  <!-- ⚠️ 자바스크립트 코드는 반드시 아래처럼 <script> 태그 안에 넣어주셔야 합니다! -->
+    <!-- 결과 및 로딩 표시 영역 -->
+    <div id="resultContainer" class="space-y-3"></div>
+  </div>
+
   <script>
     async function searchLecture() {
-      const lectureName = document.getElementById('lectureInput').value;
-      if (!lectureName) return alert('강의명을 입력해주세요.');
-      
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lectureName })
-      });
-      
-      const data = await response.json();
-      
-      if (data.candidates && data.candidates.length > 0) {
-        renderCandidateList(data.candidates);
-      } else {
-        alert('검색 결과가 없습니다.');
+      const lectureInput = document.getElementById('lectureInput');
+      const container = document.getElementById('resultContainer');
+      const lectureName = lectureInput.value.trim();
+
+      if (!lectureName) {
+        alert('강의명을 입력해주세요.');
+        return;
+      }
+
+      // 로딩 UI 표시
+      container.innerHTML = `
+        <div class="text-center py-6 text-gray-500">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent mb-2"></div>
+          <p>AI가 인강 정보를 검색 중입니다...</p>
+        </div>
+      `;
+
+      try {
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lectureName })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || '검색 도중 오류가 발생했습니다.');
+        }
+
+        if (data.candidates && data.candidates.length > 0) {
+          renderCandidateList(data.candidates);
+        } else {
+          container.innerHTML = '<p class="text-center text-gray-500 py-4">검색 결과가 없습니다.</p>';
+        }
+      } catch (error) {
+        alert(error.message);
+        container.innerHTML = '';
       }
     }
 
     function renderCandidateList(candidates) {
       const container = document.getElementById('resultContainer');
-      container.innerHTML = '<h3>원하시는 강의를 선택해주세요:</h3>';
-      
+      container.innerHTML = '<h3 class="text-sm font-semibold text-gray-600 mb-2">원하시는 강의를 선택해주세요:</h3>';
+
       candidates.forEach(item => {
         const btn = document.createElement('button');
-        btn.className = 'candidate-item';
-        btn.style.display = 'block';
-        btn.style.margin = '8px 0';
-        btn.style.padding = '10px';
-        btn.style.width = '100%';
-        btn.style.textAlign = 'left';
-        btn.style.cursor = 'pointer';
+        btn.className = 'w-full text-left p-4 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all duration-150 group';
         
         btn.innerHTML = `
-          <strong>${item.lectureTitle}</strong> (${item.teacherName} 선생님)<br>
-          <small>총 ${item.totalEpisodes}강 / 강당 약 ${item.avgDurationMinutes}분</small>
+          <div class="font-bold text-gray-800 group-hover:text-blue-600">${item.lectureTitle}</div>
+          <div class="text-xs text-gray-500 mt-1">
+            👨‍🏫 ${item.teacherName} 선생님 | 📌 총 ${item.totalEpisodes}강 (강당 약 ${item.avgDurationMinutes}분)
+          </div>
         `;
-        
-        btn.onclick = () => {
-          selectLecture(item);
-        };
-        
+
+        btn.onclick = () => selectLecture(item);
         container.appendChild(btn);
       });
     }
 
     function selectLecture(selected) {
       alert(`'${selected.lectureTitle}' 강의가 선택되었습니다!`);
-      // 선택 후 추가 로직 처리
     }
   </script>
 </body>
