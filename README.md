@@ -14,3 +14,12 @@ Gemini API를 이용해 인강 정보를 자동 검색하고, 지정한 기간 �
    - **Key**: `GEMINI_API_KEY`
    - **Value**: Google AI Studio에서 발급받은 API 키
 4. **Deploy** 버튼을 눌러 배포를 완료합니다.
+## database 키
+const firebaseConfig = {
+  apiKey: "AIzaSyDGbrQclH1hQhcnRepyjeZcr36hf3mBwSs",
+  authDomain: "erica-e67dd.firebaseapp.com",
+  projectId: "erica-e67dd",
+  storageBucket: "erica-e67dd.firebasestorage.app",
+  messagingSenderId: "40085931746",
+  appId: "1:40085931746:web:bbbf5f0040d8fcc7e7c0bb"
+};
